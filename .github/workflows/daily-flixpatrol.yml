@@ -2,8 +2,8 @@ name: Daily FlixPatrol Scraper
 
 on:
   schedule:
-    - cron: '30 7 * * *'     # Runs every day at 07:30 UTC
-  workflow_dispatch:         # Allows manual runs
+    - cron: '30 7 * * *'     # Runs daily at 07:30 UTC
+  workflow_dispatch:         # This enables the 'Run workflow' button
 
 jobs:
   scrape-and-commit:
@@ -33,7 +33,7 @@ jobs:
             --directory-prefix=flixpatrol-archive/${{ steps.date.outputs.date }} \
             https://flixpatrol.com/top10/streaming/australia/${{ steps.date.outputs.date }}/
 
-      -      - name: Commit and push changes
+      - name: Commit and push changes
         env:
           TOKEN: ${{ secrets.GH_PAT }}
         run: |
