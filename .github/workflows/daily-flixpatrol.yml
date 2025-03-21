@@ -33,7 +33,7 @@ jobs:
             --directory-prefix=flixpatrol-archive/${{ steps.date.outputs.date }} \
             https://flixpatrol.com/top10/streaming/australia/${{ steps.date.outputs.date }}/
 
-      - name: Commit and push changes
+      -      - name: Commit and push changes
         env:
           TOKEN: ${{ secrets.GH_PAT }}
         run: |
@@ -42,4 +42,4 @@ jobs:
           git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git add flixpatrol-archive/${{ steps.date.outputs.date }}
           git commit -m "Add FlixPatrol archive for ${{ steps.date.outputs.date }}" || echo "Nothing to commit"
-          git push origin HEAD:${{ github.ref_name }}
+          git push origin HEAD:main
