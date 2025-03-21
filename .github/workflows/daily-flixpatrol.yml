@@ -1,0 +1,45 @@
+name: Daily FlixPatrol Scraper
+
+on:
+  schedule:
+    - cron: '30 7 * * *'     # Runs every day at 07:30 UTC
+  workflow_dispatch:         # Allows manual runs
+
+jobs:
+  scrape-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install wget
+        run: sudo apt-get update && sudo apt-get install -y wget
+
+      - name: Set date variable
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Create folder for today's scrape
+        run: mkdir -p flixpatrol-archive/${{ steps.date.outputs.date }}
+
+      - name: Download FlixPatrol page for today
+        run: |
+          wget \
+            --convert-links \
+            --adjust-extension \
+            --page-requisites \
+            --no-parent \
+            --directory-prefix=flixpatrol-archive/${{ steps.date.outputs.date }} \
+            https://flixpatrol.com/top10/streaming/australia/${{ steps.date.outputs.date }}/
+
+      - name: Commit and push changes
+        env:
+          TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
+          git add flixpatrol-archive/${{ steps.date.outputs.date }}
+          git commit -m "Add FlixPatrol archive for ${{ steps.date.outputs.date }}" || echo "Nothing to commit"
+          git push origin HEAD:${{ github.ref_name }}
